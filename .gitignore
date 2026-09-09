@@ -1,0 +1,14 @@
+# 本地运行产物
+logs/
+run/
+*.log
+*.jsonl
+
+# Python
+__pycache__/
+*.py[cod]
+
+# 编辑器与系统
+.vscode/
+.DS_Store
+Thumbs.db

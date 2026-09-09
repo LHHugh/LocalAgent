@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen3-VL 智能体 · 在线体验</title>
+<meta name="description" content="部署在实验室服务器上的 Qwen3-VL-30B 智能体公开演示：流式对话、联网搜索、工具调用过程可视化。">
+<meta name="theme-color" content="#5b5bd6">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+
+<!-- ───────────────────────── 顶栏 ───────────────────────── -->
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="6" width="16" height="13" rx="3"/>
+        <path d="M12 2v4M8.5 19v1.5M15.5 19v1.5"/><circle cx="9.2" cy="12" r="1.1" fill="currentColor" stroke="none"/>
+        <circle cx="14.8" cy="12" r="1.1" fill="currentColor" stroke="none"/>
+      </svg>
+    </span>
+    <div class="brand-text">
+      <h1 id="site-title">Qwen3-VL 智能体</h1>
+      <p id="site-subtitle">加载中…</p>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div id="status" class="status" title="服务状态">
+      <span class="dot"></span><span class="status-text">检测中</span>
+    </div>
+    <button id="btn-settings" class="icon-btn" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-2.87 1.2V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 3 15a1.7 1.7 0 0 0-1.6-1H1a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 3 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 7 4.6h.09A1.7 1.7 0 0 0 9 3V2.9a2 2 0 1 1 4 0V3a1.7 1.7 0 0 0 2.87 1.2l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.09a1.7 1.7 0 0 0 1.6 1H23a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+    <a id="btn-repo" class="icon-btn" href="#" target="_blank" rel="noopener" title="查看源码">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.4 13.4 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.4 3.4 0 0 0 9 19.16V23"/>
+      </svg>
+    </a>
+  </div>
+</header>
+
+<!-- ───────────────────────── 主体 ───────────────────────── -->
+<main class="chat" id="chat">
+  <div class="chat-inner" id="messages"></div>
+</main>
+
+<!-- ───────────────────────── 输入区 ───────────────────────── -->
+<footer class="composer">
+  <div class="composer-inner">
+    <div class="input-wrap">
+      <textarea id="input" rows="1" placeholder="输入消息，Enter 发送，Shift+Enter 换行"
+                autocomplete="off" spellcheck="false"></textarea>
+      <button id="btn-send" class="send" title="发送" disabled>
+        <svg class="ic-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+        <svg class="ic-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="6" width="12" height="12" rx="2"/>
+        </svg>
+      </button>
+    </div>
+    <p class="hint" id="hint">回复由 AI 生成，可能不准确。请勿输入敏感信息。</p>
+  </div>
+</footer>
+
+<!-- ───────────────────────── 设置抽屉 ───────────────────────── -->
+<div class="drawer-mask" id="drawer-mask" hidden></div>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawer-head">
+    <h2>设置</h2>
+    <button class="icon-btn" id="btn-close-drawer" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="drawer-body">
+    <label class="field">
+      <span>服务端点</span>
+      <input id="cfg-endpoint" type="url" placeholder="https://your-domain.ngrok-free.app">
+      <em>留空恢复为站点默认值。修改只保存在本机浏览器。</em>
+    </label>
+
+    <label class="field">
+      <span>温度 <b id="cfg-temp-val">0.7</b></span>
+      <input id="cfg-temp" type="range" min="0" max="1" step="0.1" value="0.7">
+    </label>
+
+    <label class="field">
+      <span>最大生成长度 <b id="cfg-max-val">1024</b></span>
+      <input id="cfg-max" type="range" min="256" max="2048" step="128" value="1024">
+    </label>
+
+    <div class="field">
+      <span>服务信息</span>
+      <pre id="cfg-health" class="health-box">读取中…</pre>
+    </div>
+
+    <div class="drawer-actions">
+      <button id="btn-clear" class="btn ghost">清空当前对话</button>
+      <button id="btn-reset" class="btn ghost">恢复默认设置</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ───────────────────────── 离线提示条 ───────────────────────── -->
+<div class="banner" id="banner" hidden>
+  <span id="banner-text"></span>
+  <button id="banner-close" class="banner-close" aria-label="关闭">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
