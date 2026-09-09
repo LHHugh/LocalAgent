@@ -13,7 +13,7 @@ window.DEMO_CONFIG = {
   //   1) ngrok Hobbyist($10/月)：控制台 Domains 里挑一个自定义域名，
   //      再用 `NGROK_DOMAIN=你的域名.ngrok.app bash server/start_public.sh` 启动；
   //   2) Cloudflare Tunnel(免费，需自备一个域名)：在服务器跑 cloudflared。
-  endpoint: "https://5a00-2001-250-3c0f-1006-00-cfa7.ngrok-free.app",
+  endpoint: "https://b6a1-2001-250-3c0f-1006-00-cfa7.ngrok-free.app",
 
   // 展示用的元信息，只影响界面文案
   site: {
