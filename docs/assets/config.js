@@ -7,9 +7,13 @@
  */
 window.DEMO_CONFIG = {
   // 智能体服务地址（不要带结尾斜杠）。
-  // 这是 ngrok 隧道地址，免费版重启后会变化；换了地址请同步修改这里，
-  // 或在 ngrok 控制台申请一个固定域名（dashboard.ngrok.com → Domains → Create）。
-  endpoint: "https://906d-2001-250-3c0f-1006-00-cfa7.ngrok-free.app",
+  // 这是 ngrok 隧道地址。免费版每次重启都会生成新地址（已实测验证），
+  // 所以换了地址必须同步改这里并重新推送 Pages。
+  // 想要固定地址有两种办法：
+  //   1) ngrok Hobbyist($10/月)：控制台 Domains 里挑一个自定义域名，
+  //      再用 `NGROK_DOMAIN=你的域名.ngrok.app bash server/start_public.sh` 启动；
+  //   2) Cloudflare Tunnel(免费，需自备一个域名)：在服务器跑 cloudflared。
+  endpoint: "https://5a00-2001-250-3c0f-1006-00-cfa7.ngrok-free.app",
 
   // 展示用的元信息，只影响界面文案
   site: {

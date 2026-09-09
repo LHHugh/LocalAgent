@@ -80,7 +80,7 @@ do_start() {
     echo "ngrok 已在运行 (PID $(cat "$NG_PID"))"
   else
     if [[ -n "$NGROK_DOMAIN" ]]; then
-      nohup setsid "$NGROK" http --domain="$NGROK_DOMAIN" "$GW_PORT" \
+      nohup setsid "$NGROK" http --url="$NGROK_DOMAIN" "$GW_PORT" \
           --log "$ROOT/logs/ngrok.log" >/dev/null 2>&1 &
     else
       nohup setsid "$NGROK" http "$GW_PORT" \
