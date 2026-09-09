@@ -12,3 +12,6 @@ __pycache__/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# 本地未跟踪的运维密钥（sync_ngrok.py 读取，绝不提交）
+.ngrok_sync.env
