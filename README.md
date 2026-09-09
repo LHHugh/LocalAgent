@@ -8,7 +8,7 @@
 
 把一台实验室服务器上的 Qwen3-VL-30B 智能体开放到公网，让任何人在浏览器里直接试用。
 
-**在线体验：** https://LHHugh.github.io/qwen3-vl-agent-demo/
+**在线体验：** https://lhhugh.github.io/LocalAgent/
 
 ![演示站首屏](screenshots/01-welcome.png)
 
@@ -73,7 +73,7 @@ vLLM :8000                  Qwen3-VL-30B-A3B-Instruct-FP8，TP=2
 ## 目录结构
 
 ```
-qwen3-vl-agent-demo/
+LocalAgent/
 ├── docs/                      GitHub Pages 的站点根目录
 │   ├── index.html             单页应用，无构建步骤
 │   └── assets/

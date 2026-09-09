@@ -20,7 +20,7 @@ window.DEMO_CONFIG = {
     title: "Qwen3-VL 智能体 · 在线体验",
     subtitle: "Qwen3-VL-30B-A3B-Instruct · vLLM 部署 · 支持工具调用与流式输出",
     botName: "Qwen-Agent",
-    repo: "https://github.com/LHHugh/qwen3-vl-agent-demo",
+    repo: "https://github.com/LHHugh/LocalAgent",
     author: "LHHugh",
   },
 
