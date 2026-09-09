@@ -1,5 +1,11 @@
 # Qwen3-VL 智能体 · 公开演示
 
+![Pages](https://img.shields.io/badge/GitHub%20Pages-live-4c1?logo=github&logoColor=white)
+![Model](https://img.shields.io/badge/model-Qwen3--VL--30B--A3B-6f42c1)
+![Backend](https://img.shields.io/badge/backend-vLLM%20%2B%20Qwen--Agent-005571)
+![Deps](https://img.shields.io/badge/dependencies-0-2ea44f)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 把一台实验室服务器上的 Qwen3-VL-30B 智能体开放到公网，让任何人在浏览器里直接试用。
 
 **在线体验：** https://LHHugh.github.io/qwen3-vl-agent-demo/
