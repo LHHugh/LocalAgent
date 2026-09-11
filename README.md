@@ -6,7 +6,7 @@
 ![Deps](https://img.shields.io/badge/dependencies-0-2ea44f)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-把自托管的 Qwen3-VL-30B 智能体开放到公网，让任何人在浏览器里直接体验。
+把自托管的 Qwen3-VL-30B 智能体开放，在浏览器里直接体验。
 
 **在线体验：** https://lhhugh.github.io/LocalAgent/
 
@@ -18,7 +18,6 @@
 
 这是一个可公开访问的智能体聊天页面，后端运行在自托管的远程服务器上。访客打开网页就能对话，能看到模型逐字生成的流式输出，也能看到它调用联网搜索工具的全过程。
 
-整个仓库只做三件事：一个零依赖的静态演示页面、一个把智能体安全暴露到公网的网关、一份完整的部署与加固说明。它不是一个智能体框架，也不包含模型权重；后端基于已有的 vLLM 与 Qwen-Agent 服务。
 
 ## 功能特性
 
