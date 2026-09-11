@@ -92,9 +92,8 @@
         </button>
       </div>
       <div id="att-preview" class="att-preview" hidden></div>
-      <input id="file-input" type="file" multiple
-             accept="image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.py,.js,.ts,.java,.c,.cpp,.h,.hpp,.go,.rs,.xml,.yaml,.yml,.html,.css,.toml,.ini,.sh,.sql,.tex"
-             hidden>
+      <input id="file-input" class="visually-hidden" type="file" multiple tabindex="-1" aria-hidden="true"
+             accept="image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.py,.js,.ts,.java,.c,.cpp,.h,.hpp,.go,.rs,.xml,.yaml,.yml,.html,.css,.toml,.ini,.sh,.sql,.tex">
       <p class="hint" id="hint">回复由 AI 生成，可能不准确。请勿输入敏感信息。</p>
     </div>
   </footer>
