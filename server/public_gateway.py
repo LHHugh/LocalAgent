@@ -48,9 +48,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 ALLOW_GET = {"/api/health"}
 ALLOW_POST = {"/api/chat"}
 
-MAX_BODY_BYTES = 256 * 1024     # 请求体上限
+MAX_BODY_BYTES = 12 * 1024 * 1024   # 请求体上限（需容纳 base64 图片）
 MAX_MESSAGES = 20               # 上下文消息条数上限
-MAX_INPUT_CHARS = 4000          # 单条消息字符数上限
+MAX_INPUT_CHARS = 16000         # 单条文本消息字符数上限（文本文件可内联）
+MAX_IMAGE_BYTES = 9 * 1024 * 1024    # 单张图片 base64 上限（约 6.7MB 原始）
 UPSTREAM_TIMEOUT = 900          # 上游超时（秒），与长推理保持一致
 
 # 本地开发机上常配了 HTTP_PROXY，会把 127.0.0.1 / 内网地址也代理走导致 502，
@@ -133,15 +134,39 @@ def sanitize_chat_body(body, max_tokens_cap):
         if role not in ("user", "assistant", "system"):
             continue
         content = m.get("content")
-        if isinstance(content, list):          # 多模态：只保留文本片段
-            content = " ".join(
-                x.get("text", "") for x in content if isinstance(x, dict)
-            )
-        if not isinstance(content, str):
+        if isinstance(content, list):          # 多模态：保留文本与图片，剥离其余类型
+            parts = []
+            chars = 0
+            for p in content:
+                if not isinstance(p, dict):
+                    continue
+                t = p.get("type")
+                if t == "text":
+                    txt = p.get("text", "")
+                    if not isinstance(txt, str):
+                        continue
+                    if len(txt) > MAX_INPUT_CHARS:
+                        txt = txt[:MAX_INPUT_CHARS]
+                    chars += len(txt)
+                    parts.append({"text": txt})
+                elif t == "image_url":
+                    img = (p.get("image_url") or {})
+                    url = img.get("url", "") if isinstance(img, dict) else ""
+                    # 仅接受内联 data: 图片，避免外链 / SSRF；
+                    # 转换为上游 Qwen-Agent 的图片内容格式（{"image": url}）
+                    if isinstance(url, str) and url.startswith("data:image/") \
+                            and len(url) <= MAX_IMAGE_BYTES:
+                        parts.append({"image": url})
+                # 其他类型（客户端已转成 text 的 file 等）忽略
+            if not parts:
+                continue
+            cleaned.append({"role": role, "content": parts})
+        elif isinstance(content, str):
+            if len(content) > MAX_INPUT_CHARS:
+                content = content[:MAX_INPUT_CHARS]
+            cleaned.append({"role": role, "content": content})
+        else:
             continue
-        if len(content) > MAX_INPUT_CHARS:
-            content = content[:MAX_INPUT_CHARS]
-        cleaned.append({"role": role, "content": content})
     if not cleaned:
         return None, "没有有效的消息内容"
 
@@ -263,7 +288,14 @@ class GatewayHandler(BaseHTTPRequestHandler):
         user_text = ""
         for m in reversed(body["messages"]):
             if m["role"] == "user":
-                user_text = m["content"]
+                c = m.get("content", "")
+                if isinstance(c, str):
+                    user_text = c
+                elif isinstance(c, list):
+                    user_text = " ".join(
+                        p.get("text", "") for p in c
+                        if isinstance(p, dict) and p.get("type") == "text"
+                    )
                 break
 
         self.audit and self.audit.write(

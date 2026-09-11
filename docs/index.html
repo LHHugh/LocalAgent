@@ -81,13 +81,20 @@
     <div class="composer-inner">
       <div id="active-skills" class="active-skills" hidden></div>
       <div class="input-wrap">
-        <textarea id="input" rows="1" placeholder="输入消息，Enter 发送，Shift+Enter 换行"
+        <button id="btn-attach" class="attach-btn" type="button" title="添加文件 / 图片">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 0 1-7.07-7.07l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <textarea id="input" rows="1" placeholder="输入消息，Enter 发送，Shift+Enter 换行；也可附上图片或文本文件"
                   autocomplete="off" spellcheck="false"></textarea>
         <button id="btn-send" class="send" title="发送" disabled>
           <svg class="ic-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
           <svg class="ic-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
         </button>
       </div>
+      <div id="att-preview" class="att-preview" hidden></div>
+      <input id="file-input" type="file" multiple
+             accept="image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.py,.js,.ts,.java,.c,.cpp,.h,.hpp,.go,.rs,.xml,.yaml,.yml,.html,.css,.toml,.ini,.sh,.sql,.tex"
+             hidden>
       <p class="hint" id="hint">回复由 AI 生成，可能不准确。请勿输入敏感信息。</p>
     </div>
   </footer>
