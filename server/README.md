@@ -40,7 +40,7 @@ python3 public_gateway.py \
 
 **限流与并发。** 按来源 IP 做每分钟与每小时双窗口计数，同时用信号量限制后端并发。走 ngrok 时真实 IP 从 `X-Forwarded-For` 的最左侧取值，否则所有流量都会被算成 `127.0.0.1` 而让限流失效。
 
-**请求体检。** 限制请求体 256 KB、消息 20 条、单条 4000 字，并把 `max_tokens` 强制压到配置上限以内。上下文只有 8K 的模型很容易被超长输入撑爆，这一步不能省。客户端传入的 `model` 与 `mode` 字段会被丢弃，避免访客自定义模型或触发自主执行模式。
+**请求体检。** 当前代码限制请求体为 12 MiB，保留最后 20 条消息；纯文本消息或多模态消息中的每个文本分段最多保留 16000 字符。图片仅接受内联 `data:image/` URL，单个 URL 长度上限为 `9 * 1024 * 1024` 字符，不接受外链图片。`max_tokens` 会被压到启动参数配置的上限以内（默认 1024）。模型总上下文取决于推理服务配置。客户端传入的 `model` 与 `mode` 字段会被丢弃。
 
 **SSE 透传。** 上游是 `text/event-stream` 时逐块转发，不做任何缓冲，前端的逐字显示效果才有保障。
 
@@ -52,13 +52,13 @@ ngrok 最省事，一条命令就有 HTTPS 域名：
 ngrok http 8801
 ```
 
-免费版有几个坑。低于 3.20 的 agent 会被服务端直接拒收，报错 `ERR_NGROK_121`，升级到最新版即可。免费版还会给浏览器请求插一张「Visit Site」拦截页，前端必须带上 `ngrok-skip-browser-warning: true` 才能绕过；一旦带了这个自定义头，浏览器就会先发 OPTIONS 预检，网关回显 `Access-Control-Request-Headers` 正是为了让它通过。另外免费版的地址每次重启都会变，想固定就在控制台申请一个免费静态域名，然后：
+如果浏览器请求遇到 ngrok 的「Visit Site」提示页，前端会通过 `ngrok-skip-browser-warning: true` 请求头处理。这个头会触发 OPTIONS 预检，网关回显 `Access-Control-Request-Headers` 以支持它。域名是否变化取决于账号与隧道配置；如已分配固定域名，可按当前 ngrok 客户端支持的参数启动，例如：
 
 ```bash
 ngrok http --domain=your-name.ngrok-free.app 8801
 ```
 
-frp 和 Cloudflare Tunnel 同样可用。frp 需要一台有公网 IP 的服务器；Cloudflare Tunnel 免费且没有拦截页，named tunnel 需要你有一个域名。
+frp、Cloudflare Tunnel 或 HTTPS 反向代理也可用于提供公网入口；请按所选服务的当前文档配置域名与 TLS。
 
 ## 第四步：接上前端
 
@@ -70,16 +70,18 @@ endpoint: "https://your-name.ngrok-free.app",
 
 ## 运维
 
+`start_public.sh` 是原部署环境的模板。使用前先修改其中的 `PY`、`ROOT` 与 ngrok 路径，并准备自己的 `public_agent_server.py`（本仓库不包含该智能体服务实现）。
+
 ```bash
 bash start_public.sh          # 启动全部组件
 bash start_public.sh status   # 查看状态与当前公网地址
 bash start_public.sh stop     # 停止全部
-bash start_public.sh restart  # 重启（注意：会更换 ngrok 随机域名）
+bash start_public.sh restart  # 重启；随后检查公网地址是否变化
 ```
 
 日志在 `logs/` 下，`audit.jsonl` 逐条记录每次对话的来源 IP、输入长度与 User-Agent。
 
-配合 systemd 或 supervisor 做开机自启会更省心。要注意的是服务器重启后 ngrok 会换地址，所以更稳妥的做法是申请静态域名，或者写个小脚本把新地址自动同步到仓库。
+配合 systemd 或 supervisor 可以配置开机自启。如果隧道地址发生变化，需要同步更新前端配置。根目录的 `sync_ngrok.py` 提供同步辅助，首次使用建议先执行 `--dry-run`；默认运行会尝试提交并推送修改。
 
 ## 上线前自查
 

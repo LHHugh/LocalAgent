@@ -1,150 +1,222 @@
-# Qwen3-VL Agent · 公开演示
+<p align="center">
+  <img src="screenshots/readme-hero.png" alt="LocalAgent：让自托管智能体，拥有好用的对话界面。新版历史侧栏、技能与附件入口。" width="100%">
+</p>
 
-![Pages](https://img.shields.io/badge/GitHub%20Pages-live-4c1?logo=github&logoColor=white)
-![Model](https://img.shields.io/badge/model-Qwen3--VL--30B--A3B-6f42c1)
-![Backend](https://img.shields.io/badge/backend-vLLM%20%2B%20Qwen--Agent-005571)
-![Deps](https://img.shields.io/badge/dependencies-0-2ea44f)
-![License](https://img.shields.io/badge/license-MIT-green)
+<h1 align="center">LocalAgent</h1>
 
-把自托管的 Qwen3-VL-30B 智能体开放，在浏览器里直接体验。
+<p align="center">
+  <strong>让自托管智能体，拥有好用的对话界面。</strong><br>
+  基于 Qwen3-VL 与 Qwen-Agent 的公开演示前端：多模态对话、工具调用可视化、自定义技能。<br>
+  原生 HTML / CSS / JavaScript，前端零第三方依赖，无需构建。
+</p>
 
-**在线体验：** https://lhhugh.github.io/LocalAgent/
+<p align="center">
+  <a href="https://lhhugh.github.io/LocalAgent/"><img src="https://img.shields.io/badge/在线体验-GitHub_Pages-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="打开在线体验"></a>
+  <img src="https://img.shields.io/badge/模型-Qwen3--VL--30B--A3B-6554c0?style=flat-square" alt="模型 Qwen3-VL-30B-A3B">
+  <img src="https://img.shields.io/badge/前端-零依赖-334155?style=flat-square" alt="前端零第三方依赖">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-15803d?style=flat-square" alt="MIT License"></a>
+</p>
 
-![演示站首屏](screenshots/01-welcome.png)
+<p align="center">
+  <a href="https://lhhugh.github.io/LocalAgent/">在线体验</a> ·
+  <a href="#界面与功能">界面与功能</a> ·
+  <a href="#快速开始">快速开始</a> ·
+  <a href="#部署自己的服务">部署自己的服务</a> ·
+  <a href="#常见问题">常见问题</a>
+</p>
 
 ---
 
 ## 这是什么
 
-这是一个可公开访问的智能体聊天页面，后端运行在自托管的远程服务器上。访客打开网页就能对话，能看到模型逐字生成的流式输出，也能看到它调用联网搜索工具的全过程。
+LocalAgent 把自托管的智能体接到一个轻量的浏览器对话工作区：访客打开网页即可与模型交流，上传图片或文本文件，并查看联网工具的调用过程。
 
+仓库提供 **静态前端与 Python 公网网关**。演示后端使用 Qwen3-VL-30B-A3B-Instruct、vLLM 和 Qwen-Agent；模型权重、推理服务以及部署专用的智能体服务实现不包含在本仓库中。
 
-## 功能特性
+> **先体验，再部署。** [打开演示站](https://lhhugh.github.io/LocalAgent/)即可查看界面。模型运行在远程服务器上，可能因维护或网络波动离线。项目名中的 Local 不表示浏览器本地推理：发送的内容会交给配置的服务端点处理。
 
-演示页面刻意做成像主流 AI 网页那样顺手：
+## 界面与功能
 
-- **多轮对话与历史**：左侧边栏按「今天 / 昨天 / 近 7 天 / 更早」分组展示近期对话，支持搜索、新建、切换。
-- **对话管理**：每条对话可一键复制全文、可删除（删除后 5 秒内可撤销），双击标题即可重命名。
-- **单条消息复制**：鼠标悬停在某条消息上，右上角出现复制按钮，方便摘录片段。
-- **技能（Skills）**：在「技能」面板里添加自定义指令（名称 + 提示词），可勾选「附加到当前对话」，作为系统提示注入本次会话；技能与对话均只保存在你的浏览器里。
-- **图片与文件上传**：输入框左侧的回形针按钮可添加图片或纯文本文件。图片会作为视觉输入发送给 Qwen3-VL（自动压缩到最长边 1024px 以便通过公网隧道），文本文件内容会内联进消息；附件在发送前以缩略图 / 卡片形式预览，可单独移除。
-- **流式输出与工具可视化**：逐字渲染，联网搜索等工具调用以可展开卡片呈现过程与结果。
-- **白 / 灰主色调**：干净的浅色界面，贴近常见商业 AI 产品的观感。
+浅色工作区将历史对话放在左侧，技能与设置位于侧栏底部，附件与消息输入集中在底部输入区；窄屏下可以通过菜单切换侧栏。
 
-![对话与工具调用](screenshots/03-tool-call.png)
-
----
-
-## 为什么需要这一层设计
-
-后端通常部署在私有网络或没有固定公网入口的服务器上，直接暴露完整智能体能力会带来较大安全风险。主智能体服务往往具备 Shell、文件读写、代码执行等工具，直接面向公网等于开放过大的攻击面。
-
-因此，这里采用「只读实例 + 公网网关」的双层架构：由独立进程运行一个工具被裁剪过的只读实例，再由网关统一收口所有公网流量。主服务无需改动，两者通过独立的数据目录与进程隔离。
-
-## 架构
-
-```
-访客浏览器
-    │  HTTPS
-    ▼
-GitHub Pages ─────────────┐   静态页面，零构建
-    │                     │
-    │ SSE 直连（CORS 已开）│
-    ▼                     │
-ngrok 安全隧道 ────────────┘   公网入口，自带 HTTPS
-    │
-    ▼
-公网网关 :8801               路由白名单 / 限流 / 并发闸门 / 请求体检
-    │
-    ▼
-只读智能体实例 :8800         独立进程与数据目录，工具仅剩联网搜索
-    │
-    ▼
-vLLM :8000                  Qwen3-VL-30B-A3B-Instruct-FP8，TP=2
-```
-
-页面不经过任何中转后端，直接和网关对话。之所以能这么做，是因为网关已经返回了 `Access-Control-Allow-Origin: *`，浏览器可以跨域发起 SSE 请求。少一层转发，就少一分延迟和故障点。
-
-## 安全设计
-
-| 层次 | 措施 |
+| 能力 | 你可以做什么 |
 | --- | --- |
-| 实例隔离 | 独立进程、独立数据目录，工具开关文件随之隔离，与主服务互不影响 |
-| 工具裁剪 | Shell、代码执行、文件读写、定时任务全部关闭，只保留 `web_search` 与 `open_url` |
-| 目录白名单 | 可访问根目录清空，即使文件工具被意外打开也无处可读 |
-| 路由白名单 | 公网只放行 `/api/health` 与 `/api/chat`，开关、技能、定时任务等管理接口一律 404 |
-| 限流 | 按来源 IP 做每分钟与每小时双窗口限流，默认 6 次/分钟、40 次/小时 |
-| 并发闸门 | 后端同时最多 3 个请求，超出的请求排队或快速失败，保护共享推理资源 |
-| 请求体检 | 限制请求体大小、消息条数与单条长度，并强制把生成长度压到 1024 token 以内 |
-| 脱敏 | 系统提示词去掉个人标识与目录路径，不向访客暴露后端部署细节 |
-| 审计 | 每次对话写入 JSONL 日志，记录来源 IP、输入长度与 User-Agent |
+| 对话工作区 | 新建、搜索和切换对话；按时间分组查看历史，双击标题重命名，复制全文或删除，删除后 5 秒内可撤销。 |
+| 图片与文本 | 通过回形针添加图片、Markdown、代码、CSV 等文本文件；发送前预览并移除附件。图片会压缩为最长边不超过 1024px 的 JPEG。 |
+| 流式回复 | 随生成显示内容，支持 Markdown、代码块及复制；生成过程中可点击停止按钮中止浏览器请求。 |
+| 工具过程可见 | 展开工具卡片查看调用参数和返回内容。实际可用工具由接入的智能体服务决定。 |
+| 自定义技能 | 保存「名称 + 指令」，勾选「附加到当前对话」后作为系统消息随请求发送。这里的技能是提示词预设。 |
+| 可配置端点 | 在侧栏底部「设置」中修改服务地址、温度和生成长度，并查看服务信息。个人配置保存在当前浏览器中。 |
 
-网关会回显浏览器预检请求里的 `Access-Control-Request-Headers`，这样前端绕过 ngrok 免费版拦截页所需的自定义头才能通过 CORS 检查。
+<p align="center">
+  <img src="screenshots/02-conversation.png" alt="新版对话工作区：左侧历史列表、正文消息与底部附件输入框" width="100%">
+</p>
 
-## 目录结构
+<details>
+<summary><strong>展开查看：工具调用与技能面板</strong></summary>
 
+### 工具调用
+
+<img src="screenshots/03-tool-call.png" alt="展开的 web_search 工具卡片，显示示例参数与结果" width="100%">
+
+### 自定义技能
+
+<img src="screenshots/04-skills.png" alt="新版技能面板：填写技能名称和指令，保存并附加到当前对话" width="100%">
+
+</details>
+
+<sub>截图由当前仓库前端渲染；对话和工具结果使用明确标注的示例数据。截图未连接真实后端，离线状态不代表演示站的实时状态。顶部封面是基于该界面的设计展示图，首页原始截图见 screenshots/01-welcome.png。</sub>
+
+## 快速开始
+
+### 1. 本地打开前端
+
+需要 Git 和 Python 3，无需安装 Node.js 或前端依赖。
+
+```bash
+git clone https://github.com/LHHugh/LocalAgent.git
+cd LocalAgent
+python -m http.server 8080 --directory docs
 ```
+
+打开 **http://localhost:8080**。如果 Python 命令名为 `python3`，替换上面的 `python` 即可。
+
+### 2. 连接服务
+
+点击左侧底部 **设置 → 服务端点**，填写兼容服务的根地址，例如 `https://your-agent.example.com`，不要追加 `/api/chat`。留空可恢复站点默认端点；此修改只影响当前浏览器。
+
+要更改所有访客的默认配置，编辑 [`docs/assets/config.js`](docs/assets/config.js) 中的对应字段：
+
+```js
+endpoint: "https://your-agent.example.com",
+```
+
+同一文件还可以配置站点标题、说明、示例问题、免责声明与默认生成参数。
+
+> 前端使用 `GET /api/health` 与 `POST /api/chat`，并解析项目约定的 SSE 事件；不能仅填入任意 OpenAI `/v1` 地址就直接使用。只有前端时可以浏览界面，真实对话还需要兼容的智能体后端。
+
+### 3. 开始一次对话
+
+输入问题，按 **Enter** 发送、**Shift + Enter** 换行。通过回形针附加图片或文本，或者先到「技能」面板保存并启用自己的写作、解释或翻译指令。
+
+## 工作原理
+
+```mermaid
+flowchart TD
+    P[GitHub Pages / 自托管静态站点] -->|提供前端资源| B[访客浏览器]
+    B -->|HTTPS 请求 / SSE 响应| T[HTTPS 隧道或反向代理]
+    T --> G[公网网关 · 8801]
+    G -->|仅允许 health / chat| A[受限智能体实例 · 8800]
+    A --> V[vLLM · 8000]
+    V --> M[Qwen3-VL]
+```
+
+静态站点负责交付页面；聊天请求由浏览器直接发送到公网网关。网关限制访问路径、请求大小、速率与并发，并将流式响应转发给浏览器。工具能力由独立的受限智能体实例提供。
+
+## 部署自己的服务
+
+完整背景与操作说明见 [`server/README.md`](server/README.md)。推荐先打通后端，再发布前端。
+
+1. **准备智能体实例。** 部署模型推理与兼容的 `/api/health`、`/api/chat` 服务；公开演示建议使用独立的受限实例，只监听本机，按需保留联网查询等工具。
+2. **启动公网网关。** 在仓库根目录运行以下命令，将 `--upstream` 改成自己的智能体地址：
+
+   ```bash
+   python server/public_gateway.py --upstream http://127.0.0.1:8800 --host 127.0.0.1 --port 8801 --per-minute 6 --per-hour 40 --max-concurrent 3 --max-tokens 1024 --audit-log ./logs/audit.jsonl
+   ```
+
+3. **提供 HTTPS 入口。** 使用 ngrok、Cloudflare Tunnel 或反向代理连接网关端口。端点需要允许 CORS；本仓库网关已处理预检和 SSE 转发。
+4. **发布静态页面。** 更新 `docs/assets/config.js` 的 `endpoint`。GitHub Pages 选择 **Deploy from a branch → main → /docs**；也可以将 `docs/` 部署到其他静态托管服务。
+
+`server/start_public.sh` 是原部署环境的启停模板，使用前需修改其中的 `PY`、`ROOT` 等路径，并自行准备 `public_agent_server.py`。它不是克隆仓库后即可直接运行的完整后端安装器。
+
+<details>
+<summary><strong>可选：同步变化后的 ngrok 地址</strong></summary>
+
+[`sync_ngrok.py`](sync_ngrok.py) 通过 SSH 读取服务器上的隧道地址并更新前端配置，额外依赖 `paramiko`。使用前配置自己的 SSH 目标；先用 `--dry-run` 查看将要修改的内容。
+
+```bash
+pip install paramiko
+python sync_ngrok.py --dry-run
+python sync_ngrok.py --no-push
+```
+
+脚本默认会尝试提交并推送修改；`--no-push` 用于只更新本地配置。域名是否变化取决于隧道配置，地址变化后才需要同步。
+
+</details>
+
+## 数据与使用边界
+
+对话历史、技能和个人设置保存在当前浏览器的 `localStorage` 中，不提供账号同步。清理站点数据会删除这些本地记录；发送消息时，对话上下文、已启用的技能和附件内容仍会发送到所配置的后端。
+
+公开网关默认记录访问与请求元数据，包括来源 IP、输入长度和 User-Agent。请不要向公开演示输入敏感信息。
+
+| 当前实现 | 默认行为 |
+| --- | --- |
+| 公开路由 | `GET /api/health`、`POST /api/chat`；其他业务路由返回 404，另处理 CORS 预检。 |
+| 限流与并发 | 每 IP 每分钟 6 次、每小时 40 次；最多 3 个并发请求，可通过启动参数调整。 |
+| 请求体 | 网关上限 12 MiB；图片采用内联 data URL，网关不接受外链图片输入。 |
+| 输入长度 | 前端输入框默认最多 4000 字符；文本文件读取前 30000 字符；网关再将纯文本消息或每个文本分段裁到 16000 字符。 |
+| 对话上下文 | 前端发送最近 10 条有效消息，并附加启用的技能；网关保留请求中的最后 20 条消息。模型总上下文取决于实际部署。 |
+| 生成长度 | 网关默认上限 1024 token。即使前端设置更高，服务端上限仍然生效。 |
+
+网关不负责禁用上游工具；实例隔离、工具裁剪与模型部署需要由部署者完成。「前端零依赖」不包括模型服务和可选运维脚本的依赖。
+
+## 常见问题
+
+**页面打开了，为什么显示离线？**
+
+静态页面可用不等于模型服务可用。检查「设置」中的端点、隧道与后端进程；域名变化后更新配置。通过 HTTPS 页面访问后端时，也应使用 HTTPS 端点。
+
+**为什么不能上传 PDF、Word 或视频？**
+
+当前附件入口面向图片和可读取的纯文本文件，不包含 PDF、Office 文档或视频解析器。请先转换为受支持的图片或文本格式。
+
+**为什么回复较短，或较早的对话内容没有被记住？**
+
+公开网关默认限制输出长度，前端只发送最近的部分历史。完整浏览器历史不会全部进入每次模型请求。
+
+**能完全离线使用吗？**
+
+前端资源无需外部 CDN，但真实对话仍需可访问的推理与智能体服务。只有将整套后端部署到本地，并配置不依赖外部网络的功能后，才可能离线运行。
+
+## 项目结构
+
+```text
 LocalAgent/
-├── docs/                      GitHub Pages 的站点根目录
-│   ├── index.html             单页应用，无构建步骤
+├── docs/                     # 静态站点，可直接部署到 GitHub Pages
+│   ├── index.html            # 页面与面板结构
 │   └── assets/
-│       ├── config.js          端点、文案、示例问题都在这里配
-│       ├── app.js             对话逻辑、SSE 解析、Markdown 渲染
-│       ├── style.css          全部样式
-│       └── alipay-qrcode.png  赞赏码
+│       ├── config.js         # 端点、站点文案与默认参数
+│       ├── app.js            # 对话、附件、技能与 SSE 渲染
+│       ├── style.css         # 桌面与窄屏样式
+│       └── alipay-qrcode.png # 作者赞赏码
 ├── server/
-│   ├── public_gateway.py      公网网关，纯标准库实现
-│   ├── README.md              部署与安全加固说明
-│   └── start_public.sh        一键启停脚本
-├── sync_ngrok.py              域名变更时一键同步 config.js
-├── screenshots/
+│   ├── public_gateway.py     # Python 标准库公网网关
+│   ├── start_public.sh       # 需适配部署环境的启停模板
+│   └── README.md             # 后端部署与加固说明
+├── screenshots/             # README 封面与界面截图
+├── sync_ngrok.py             # 可选的域名同步工具
 ├── LICENSE
 └── README.md
 ```
 
-## 本地运行
+## 参与改进
 
-```bash
-cd docs
-python3 -m http.server 8000
-# 打开 http://127.0.0.1:8000
-```
+欢迎通过 [Issues](https://github.com/LHHugh/LocalAgent/issues) 反馈问题，或提交 Pull Request。界面问题请附上浏览器、复现步骤与截图；连接问题请附上脱敏后的错误信息。修改界面后，也请同步相关截图与说明。
 
-页面打开后会自己检测端点状态。如果服务离线，顶部会给出提示，你也可以在右上角「设置」里填入自己的端点地址，这个地址只保存在本机浏览器。
+## 致谢与许可
 
-要连到你自己的智能体后端，改动 `docs/assets/config.js` 里的 `endpoint` 即可。
+感谢 [Qwen3-VL](https://github.com/QwenLM/Qwen3-VL)、[Qwen-Agent](https://github.com/QwenLM/Qwen-Agent) 与 [vLLM](https://github.com/vllm-project/vllm) 提供模型与基础能力。
 
-## 部署成你自己的一套
+本仓库代码采用 [MIT License](LICENSE)。模型权重与外部组件遵循各自的许可。
 
-完整步骤见 [`server/README.md`](server/README.md)，大致是四步：
+<details>
+<summary><strong>支持作者</strong></summary>
 
-1. 起一个只读的智能体实例，只监听 `127.0.0.1`
-2. 在它前面挂上 `public_gateway.py`
-3. 用 ngrok、frp 或 Cloudflare Tunnel 等安全隧道把网关端口暴露出去
-4. 把拿到的 HTTPS 地址填进 `docs/assets/config.js`，推送后 GitHub Pages 自动生效
+如果这个项目对你有帮助，欢迎 Star，或支持作者继续维护公开演示。
 
-GitHub Pages 的源设置成 `main` 分支的 `/docs` 目录即可，不需要任何构建流程。
+<p align="center">
+  <img src="docs/assets/alipay-qrcode.png" alt="支付宝赞赏码" width="240">
+</p>
 
-ngrok 免费域名每次重启都会变化，仓库里提供了 `sync_ngrok.py`，可以一键读取当前地址、改写 `config.js` 并尝试推送。
-
-## 已知限制
-
-- 后端服务在远程服务器上运行，关机、断网或维护期间演示页会显示离线，这属于预期行为。
-- **ngrok 免费版每次重启都会换一个新地址**（已实测验证），更换后需要同步修改 `docs/assets/config.js` 里的 `endpoint` 并重新推送 Pages。想要固定地址：① ngrok Hobbyist（$10/月）可在控制台挑选一个自定义域名，用 `NGROK_DOMAIN=你的域名.ngrok.app bash server/start_public.sh` 启动；② 或改用 Cloudflare Tunnel（免费，需自备一个域名）。
-- 模型上下文为 8192 token，长对话会被自动截断；生成长度也限制在 1024 token 以内，目的是让更多人能公平地用上共享推理资源。
-
-## 许可
-
-代码采用 [MIT](LICENSE) 协议。请注意，这个许可只覆盖本仓库的代码，不涉及后端模型权重与数据。
-
-## 致谢
-
-后端推理使用 [vLLM](https://github.com/vllm-project/vllm)，智能体框架使用 [Qwen-Agent](https://github.com/QwenLM/Qwen-Agent)，模型为通义千问团队开源的 Qwen3-VL-30B-A3B。
-
----
-
-## 支持作者
-
-如果你觉得这个项目有帮助，欢迎扫码支持一杯咖啡，继续维护更多类似的公开演示与工具。
-
-![支付宝赞赏码](docs/assets/alipay-qrcode.png)
+</details>
