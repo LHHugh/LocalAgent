@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://lhhugh.github.io/LocalAgent/"><img src="https://img.shields.io/badge/在线体验-GitHub_Pages-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="打开在线体验"></a>
-  <img src="https://img.shields.io/badge/模型-Qwen3--VL--30B--A3B-6554c0?style=flat-square" alt="模型 Qwen3-VL-30B-A3B">
+  <img src="https://img.shields.io/badge/模型-Qwen3--VL-多模态-6554c0?style=flat-square" alt="模型 Qwen3-VL 多模态">
   <img src="https://img.shields.io/badge/前端-零依赖-334155?style=flat-square" alt="前端零第三方依赖">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-15803d?style=flat-square" alt="MIT License"></a>
 </p>
@@ -31,7 +31,7 @@
 
 LocalAgent 把自托管的智能体接到一个轻量的浏览器对话工作区：访客打开网页即可与模型交流，上传图片或文本文件，并查看联网工具的调用过程。
 
-仓库提供 **静态前端与 Python 公网网关**。演示后端使用 Qwen3-VL-30B-A3B-Instruct、vLLM 和 Qwen-Agent；模型权重、推理服务以及部署专用的智能体服务实现不包含在本仓库中。
+仓库提供 **静态前端与 Python 公网网关**。演示后端使用 Qwen3-VL 多模态模型、vLLM 和 Qwen-Agent；模型权重、推理服务以及部署专用的智能体服务实现不包含在本仓库中。
 
 > **先体验，再部署。** [打开演示站](https://lhhugh.github.io/LocalAgent/)即可查看界面。模型运行在远程服务器上，可能因维护或网络波动离线。项目名中的 Local 不表示浏览器本地推理：发送的内容会交给配置的服务端点处理。
 

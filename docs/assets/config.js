@@ -18,7 +18,7 @@ window.DEMO_CONFIG = {
   // 展示用的元信息，只影响界面文案
   site: {
     title: "Qwen3-VL 智能体 · 在线体验",
-    subtitle: "Qwen3-VL-30B-A3B-Instruct · vLLM 部署 · 支持工具调用与流式输出",
+    subtitle: "Qwen3-VL 多模态智能体 · 支持图文输入、工具调用与流式输出",
     botName: "Qwen-Agent",
     repo: "https://github.com/LHHugh/LocalAgent",
     author: "LHHugh",
