@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 控制台 · Qwen3-VL API</title>
+<meta name="description" content="管理你的 API Key，查看可直接复制的调用示例。">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="index.html"><span class="brand-mark">◈</span>Qwen3-VL API</a>
+    <nav class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="index.html#demo">在线演示</a>
+      <a href="pricing.html">定价</a>
+      <a href="api.html">文档</a>
+    </nav>
+    <div class="nav-cta"></div>
+  </div>
+</header>
+
+<div class="wrap" style="padding-top:44px;padding-bottom:60px">
+
+  <!-- 未登录 -->
+  <div class="card" id="need-login" hidden style="max-width:520px;margin:60px auto;text-align:center;padding:34px 28px">
+    <h2 style="margin:0 0 10px;font-size:20px">需要先登录</h2>
+    <p style="color:var(--text-2);font-size:14px;margin:0 0 20px">
+      价格可以随便看，但要拿到 API Key 得先有个账号。<br>登录后会自动回到这一页。
+    </p>
+    <button class="btn primary" id="btn-login-here">登录 / 注册</button>
+    <p style="margin:18px 0 0"><a href="pricing.html" style="color:var(--link);font-size:13.5px">先去看看价格</a></p>
+  </div>
+
+  <!-- 已登录 -->
+  <div id="panel" hidden>
+    <div class="note" style="margin-bottom:26px">
+      <b>关于这里的 Key：</b>本站是纯静态页面，没有后端，下面生成的 Key 保存在你自己的浏览器里，用于演示与联调。服务端鉴权接入后，Key 会改由后台签发并校验，届时这一页的用法不变。
+    </div>
+
+    <div class="cons-head">
+      <div>
+        <h1 style="font-size:28px;margin:0 0 6px">API 控制台</h1>
+        <p style="color:var(--text-2);font-size:14px;margin:0" id="account-line"></p>
+      </div>
+      <button class="btn primary" id="btn-new-key">生成新 Key</button>
+    </div>
+
+    <!-- 当前套餐 -->
+    <div class="card" style="margin-bottom:22px">
+      <h3 style="margin:0 0 14px;font-size:15px">当前套餐</h3>
+      <div id="sub-box" style="font-size:14px;color:var(--text-2)"></div>
+    </div>
+
+    <!-- Key 列表 -->
+    <div class="card" style="margin-bottom:22px">
+      <h3 style="margin:0 0 14px;font-size:15px">API Key</h3>
+      <div id="keys"></div>
+    </div>
+
+    <!-- 调用示例 -->
+    <div class="card">
+      <h3 style="margin:0 0 6px;font-size:15px">调用示例</h3>
+      <p style="font-size:13.5px;color:var(--text-2);margin:0 0 16px">
+        下面这段已经填好了你的 Key，复制即可运行。
+      </p>
+      <div class="snip-tabs">
+        <button class="snip-tab is-on" data-s="curl">cURL</button>
+        <button class="snip-tab" data-s="py">Python</button>
+        <button class="snip-tab" data-s="js">Node.js</button>
+      </div>
+      <div class="snip-wrap">
+        <button class="snip-copy" id="btn-copy-snip">复制</button>
+        <pre class="snippet" id="snip"></pre>
+      </div>
+      <table class="spec" style="margin-top:18px">
+        <tbody>
+          <tr><th style="width:130px">请求地址</th><td><code id="ep"></code></td></tr>
+          <tr><th>鉴权方式</th><td><code>Authorization: Bearer &lt;你的 Key&gt;</code></td></tr>
+          <tr><th>模型名</th><td><code id="mn"></code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="font-size:12.5px;color:var(--text-3);margin-top:22px">
+      用量统计会在服务端计费上线后开放，届时可在本页查看请求数、token 消耗与余额。
+    </p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-bottom" style="margin-top:0;padding-top:0;border-top:0">
+      <span>© 2026 Qwen3-VL API</span>
+      <span>个人开发者运营，非企业服务</span>
+      <span>模型基于 Qwen3-VL 系列开源权重</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/particles.js"></script>
+<script src="assets/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var ENDPOINT = 'https://b6a1-2001-250-3c0f-1006-00-cfa7.ngrok-free.app';
+  var MODEL = 'qwen3-vl';
+
+  var PLANS = {
+    free:    { name: 'Free',    price: '¥0',  quota: '每日 200 次请求' },
+    starter: { name: 'Starter', price: '¥9',  quota: '含 300 万 token' },
+    pro:     { name: 'Pro',     price: '¥29', quota: '含 1500 万 token' },
+    max:     { name: 'Max',     price: '¥99', quota: '含 6000 万 token' }
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function mask(k) {
+    return k.slice(0, 11) + '••••••••' + k.slice(-4);
+  }
+  function copy(text, okMsg) {
+    var done = function () { Auth.toast(okMsg || '已复制'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(fallback);
+    } else fallback();
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); }
+      catch (e) { Auth.toast('复制失败，请手动选中'); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  var needLogin = document.getElementById('need-login');
+  var panel = document.getElementById('panel');
+  var keysBox = document.getElementById('keys');
+  var snipEl = document.getElementById('snip');
+  var curSnip = 'curl';
+  var activeKey = '';
+
+  function activeKeyObj() {
+    var list = Auth.keys().filter(function (k) { return !k.revoked; });
+    return list[0] || null;
+  }
+
+  function renderSnip() {
+    var k = activeKeyObj();
+    var key = k ? k.key : 'sk-live-你的Key';
+    var url = ENDPOINT + '/v1/chat/completions';
+    var s;
+    if (curSnip === 'curl') {
+      s = 'curl ' + url + ' \\\n' +
+          '  -H "Authorization: Bearer ' + key + '" \\\n' +
+          '  -H "Content-Type: application/json" \\\n' +
+          '  -d \'{\n' +
+          '    "model": "' + MODEL + '",\n' +
+          '    "messages": [{"role": "user", "content": "用一句话介绍你自己"}],\n' +
+          '    "max_tokens": 256\n' +
+          '  }\'';
+    } else if (curSnip === 'py') {
+      s = 'from openai import OpenAI\n\n' +
+          'client = OpenAI(\n' +
+          '    api_key="' + key + '",\n' +
+          '    base_url="' + ENDPOINT + '/v1",\n' +
+          ')\n\n' +
+          'resp = client.chat.completions.create(\n' +
+          '    model="' + MODEL + '",\n' +
+          '    messages=[{"role": "user", "content": "用一句话介绍你自己"}],\n' +
+          '    max_tokens=256,\n' +
+          ')\nprint(resp.choices[0].message.content)';
+    } else {
+      s = 'import OpenAI from "openai";\n\n' +
+          'const client = new OpenAI({\n' +
+          '  apiKey: "' + key + '",\n' +
+          '  baseURL: "' + ENDPOINT + '/v1",\n' +
+          '});\n\n' +
+          'const resp = await client.chat.completions.create({\n' +
+          '  model: "' + MODEL + '",\n' +
+          '  messages: [{ role: "user", content: "用一句话介绍你自己" }],\n' +
+          '  max_tokens: 256,\n' +
+          '});\nconsole.log(resp.choices[0].message.content);';
+    }
+    snipEl.textContent = s;
+  }
+
+  function renderKeys() {
+    var list = Auth.keys();
+    if (!list.length) {
+      keysBox.innerHTML = '<p style="color:var(--text-2);font-size:14px;margin:0">' +
+        '还没有 Key，点右上角「生成新 Key」创建一个。</p>';
+      renderSnip();
+      return;
+    }
+    keysBox.innerHTML = list.map(function (k) {
+      var status = k.revoked
+        ? '<span class="key-state is-off">已吊销</span>'
+        : '<span class="key-state">正常</span>';
+      var actions = k.revoked ? '' :
+        '<button class="btn sm js-copy" data-k="' + esc(k.key) + '">复制</button> ' +
+        '<button class="btn sm js-revoke" data-id="' + esc(k.id) + '">吊销</button>';
+      return '<div class="key-row">' +
+        '<div class="key-main">' +
+          '<div class="key-label">' + esc(k.label) + ' ' + status + '</div>' +
+          '<code class="key-val">' + esc(mask(k.key)) + '</code>' +
+          '<div class="key-meta">创建于 ' + new Date(k.createdAt).toLocaleString('zh-CN') + '</div>' +
+        '</div>' +
+        '<div class="key-ops">' + actions + '</div>' +
+      '</div>';
+    }).join('');
+
+    keysBox.querySelectorAll('.js-copy').forEach(function (b) {
+      b.onclick = function () { copy(b.dataset.k, 'Key 已复制'); };
+    });
+    keysBox.querySelectorAll('.js-revoke').forEach(function (b) {
+      b.onclick = function () {
+        if (!confirm('吊销后这个 Key 立即失效，确定吗？')) return;
+        Auth.revokeKey(b.dataset.id);
+        Auth.toast('已吊销');
+        renderKeys();
+      };
+    });
+    renderSnip();
+  }
+
+  function renderSub() {
+    var sub = Auth.getSub();
+    var box = document.getElementById('sub-box');
+    if (!sub) {
+      box.innerHTML = '还没有购买套餐。<a href="pricing.html" style="color:var(--link)">去看看价格</a>（未登录也能浏览）。';
+      return;
+    }
+    var p = PLANS[sub.plan] || { name: sub.plan, price: '-', quota: '' };
+    var exp = new Date(sub.expireAt).toLocaleDateString('zh-CN');
+    box.innerHTML = '<b style="color:var(--text)">' + esc(p.name) + '</b> · ' +
+      esc(p.price) + '/月 · ' + esc(p.quota) + ' · 到期 ' + exp +
+      ' <a href="pricing.html" style="color:var(--link);margin-left:8px">续费或升级</a>';
+  }
+
+  function render() {
+    if (!Auth.isLoggedIn()) {
+      needLogin.hidden = false;
+      panel.hidden = true;
+      return;
+    }
+    needLogin.hidden = true;
+    panel.hidden = false;
+    document.getElementById('account-line').textContent = '当前账号：' + Auth.user();
+    document.getElementById('ep').textContent = ENDPOINT + '/v1/chat/completions';
+    document.getElementById('mn').textContent = MODEL;
+    renderSub();
+    renderKeys();
+  }
+
+  document.getElementById('btn-login-here').onclick = function () {
+    Auth.requireLogin('打开控制台', function () { render(); });
+  };
+
+  document.getElementById('btn-new-key').onclick = function () {
+    var n = Auth.keys().filter(function (k) { return !k.revoked; }).length;
+    Auth.createKey(n ? 'Key ' + (n + 1) : '默认 Key');
+    Auth.toast('已生成新 Key');
+    renderKeys();
+  };
+
+  document.querySelectorAll('.snip-tab').forEach(function (b) {
+    b.onclick = function () {
+      document.querySelectorAll('.snip-tab').forEach(function (x) { x.classList.remove('is-on'); });
+      b.classList.add('is-on');
+      curSnip = b.dataset.s;
+      renderSnip();
+    };
+  });
+
+  document.getElementById('btn-copy-snip').onclick = function () {
+    copy(snipEl.textContent, '示例代码已复制');
+  };
+
+  // 处理从定价页跳过来的购买
+  var pend = Auth.pending();
+  if (pend && Auth.isLoggedIn()) {
+    var days = 30;
+    Auth.setSub({
+      plan: pend.plan,
+      startedAt: Date.now(),
+      expireAt: Date.now() + days * 86400000
+    });
+    if (!Auth.keys().some(function (k) { return !k.revoked; })) {
+      Auth.createKey('默认 Key');
+    }
+    Auth.clearPending();
+    var name = (PLANS[pend.plan] || {}).name || pend.plan;
+    Auth.toast('已开通 ' + name + '，Key 已生成');
+  }
+
+  Auth.onChange(render);
+  render();
+})();
+</script>
+</body>
+</html>

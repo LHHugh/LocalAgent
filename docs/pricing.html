@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>定价与开通 · Qwen3-VL API</title>
-<meta name="description" content="Qwen3-VL API 定价方案：按额度订阅与按量计费，内测期人工审核开通。">
+<title>定价 · Qwen3-VL API</title>
+<meta name="description" content="Qwen3-VL API 定价：多模态接口，月付 9 元起，明显低于同类产品。">
 <meta name="theme-color" content="#ffffff">
 <link rel="stylesheet" href="assets/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
@@ -23,16 +23,18 @@
     </nav>
     <div class="nav-cta">
       <a class="btn sm" href="api.html">查看文档</a>
-      <a class="btn sm primary" href="#apply">申请 API Key</a>
     </div>
   </div>
 </header>
 
-<section class="hero" style="padding-bottom:20px">
+<section class="hero" style="padding-bottom:16px">
   <div class="wrap">
-    <div class="badge"><span class="dot"></span>内测价 · 人工开通</div>
+    <div class="badge"><span class="dot"></span>低价定位 · 不吹效果</div>
     <h1 style="font-size:34px">定价</h1>
-    <p class="lead" style="margin-bottom:10px">按月订阅额度，超出后按量计费。内测期价格可能调整，订阅前会在邮件中确认当期价格。</p>
+    <p class="lead" style="margin-bottom:0">
+      我们的模型能力不是顶尖水平，这一点不回避。所以价格定得很低——
+      适合"能用就行、要便宜"的场景，不适合拿来比谁更强。
+    </p>
   </div>
 </section>
 
@@ -43,32 +45,35 @@
         <h3>Free</h3>
         <div class="amount">¥0</div>
         <div class="quota">每日 200 次请求</div>
-        <ul><li>6 RPM</li><li>并发 1</li><li>最长上下文 8192</li><li>社区支持</li></ul>
-        <a class="btn sm" href="#apply">申请</a>
+        <ul><li>6 RPM</li><li>并发 1</li><li>上下文 8192</li><li>社区支持</li></ul>
+        <button class="btn sm js-buy" data-plan="free" data-name="Free">免费开始</button>
       </div>
       <div class="price">
         <h3>Starter</h3>
-        <div class="amount">¥39<small> / 月</small></div>
-        <div class="quota">含 100 万 token</div>
-        <ul><li>30 RPM</li><li>并发 2</li><li>邮件支持</li><li>可开发票（升级后）</li></ul>
-        <a class="btn sm" href="#apply">申请</a>
+        <div class="amount">¥9<small> / 月</small></div>
+        <div class="quota">含 300 万 token</div>
+        <ul><li>30 RPM</li><li>并发 2</li><li>上下文 8192</li><li>邮件支持</li></ul>
+        <button class="btn sm js-buy" data-plan="starter" data-name="Starter">购买</button>
       </div>
       <div class="price featured">
-        <span class="tag">推荐</span>
+        <span class="tag">最划算</span>
         <h3>Pro</h3>
-        <div class="amount">¥199<small> / 月</small></div>
-        <div class="quota">含 600 万 token</div>
-        <ul><li>120 RPM</li><li>并发 4</li><li>优先支持</li><li>可开发票（升级后）</li></ul>
-        <a class="btn sm primary" href="#apply">申请</a>
+        <div class="amount">¥29<small> / 月</small></div>
+        <div class="quota">含 1500 万 token</div>
+        <ul><li>120 RPM</li><li>并发 4</li><li>上下文 8192</li><li>优先支持</li></ul>
+        <button class="btn sm primary js-buy" data-plan="pro" data-name="Pro">购买</button>
       </div>
       <div class="price">
-        <h3>Enterprise</h3>
-        <div class="amount">定制</div>
-        <div class="quota">私有化或专属实例</div>
-        <ul><li>速率协商</li><li>独占部署</li><li>可签合同</li><li>可开票</li></ul>
-        <a class="btn sm" href="#apply">联系</a>
+        <h3>Max</h3>
+        <div class="amount">¥99<small> / 月</small></div>
+        <div class="quota">含 6000 万 token</div>
+        <ul><li>300 RPM</li><li>并发 8</li><li>上下文 8192</li><li>优先支持</li></ul>
+        <button class="btn sm js-buy" data-plan="max" data-name="Max">购买</button>
       </div>
     </div>
+    <p style="font-size:13px;color:var(--text-3);margin:16px 0 0">
+      价格随便看，不用登录。点「购买」时会要求先注册一个账号，登录后自动开通并生成 API Key。
+    </p>
   </div>
 </section>
 
@@ -76,21 +81,22 @@
   <div class="wrap">
     <div class="section-head">
       <div class="eyebrow">按量计费</div>
-      <h2>超出套餐额度后</h2>
-      <p>额度用完不会直接停服，而是转为按量后付费，按下面的单价从预付余额里扣。</p>
+      <h2>额度用完之后的单价</h2>
+      <p>不会直接停服，转成按量从余额里扣。</p>
     </div>
     <table class="spec">
       <thead>
         <tr><th>计费项</th><th>单价</th><th>说明</th></tr>
       </thead>
       <tbody>
-        <tr><td>输入 token</td><td class="num">¥2 / 百万</td><td>请求里的全部输入内容，含图片与历史消息</td></tr>
-        <tr><td>输出 token</td><td class="num">¥8 / 百万</td><td>模型生成的部分</td></tr>
-        <tr><td>图片输入</td><td class="num">¥0.02 / 张</td><td>按请求内图片张数计，与 token 叠加</td></tr>
+        <tr><td>输入 token</td><td class="num">¥0.5 / 百万</td><td>请求里的全部输入内容</td></tr>
+        <tr><td>输出 token</td><td class="num">¥2 / 百万</td><td>模型生成的部分</td></tr>
+        <tr><td>图片输入</td><td class="num">¥0.005 / 张</td><td>按张计，与 token 叠加</td></tr>
       </tbody>
     </table>
     <div class="note" style="margin-top:20px">
-      <b>关于单价：</b>以上为内测期拟定价。正式定价会依据实测吞吐与实际成本回填，届时以本页更新为准。当前单机双卡、并发上限较低，若你预估用量较大，建议直接按 Enterprise 谈，不建议按量试算。
+      <b>为什么这么便宜：</b>模型跑在一台自用的双卡 4090 上，成本主要是电费和硬件折旧，不是云上按卡时计费。
+      代价是并发有限（最高 8）、没有 SLA、峰值时段可能变慢。我们把这些如实写出来，让你自己判断能不能用。
     </div>
   </div>
 </section>
@@ -98,37 +104,43 @@
 <section class="section" id="apply">
   <div class="wrap">
     <div class="section-head">
-      <div class="eyebrow">开通流程</div>
-      <h2>当前为人工开通</h2>
-      <p>内测期没有自助购买，流程走人工，麻烦但可控。</p>
+      <div class="eyebrow">开通方式</div>
+      <h2>在线自助开通</h2>
+      <p>注册账号、选套餐、拿到 Key，三步走完，不需要等人审核。</p>
     </div>
 
-    <div class="pay-box">
-      <!-- TODO: 确认这张收款码是否用于商业收款，并替换为对外收款码 -->
-      <img src="assets/alipay-qrcode.png" alt="支付宝收款码">
-      <div class="txt">
-        <h3 style="margin:0 0 8px;font-size:16px">开通步骤</h3>
-        <ol>
-          <li>发邮件或私信说明<strong>用途</strong>与<strong>预估月用量</strong>（例如「内部工具图文抽取，约 200 万 token/月」）。</li>
-          <li>我确认档位与当期价格后回你，并给出应付金额。</li>
-          <li>你用支付宝扫码付款，附言里写上你的称呼或申请编号，方便对账。</li>
-          <li>核对到账后，为你开通套餐并邮件发送 API Key 与调用示例。</li>
-        </ol>
-        <p style="font-size:13px;color:var(--text-3);margin:14px 0 0">
-          付款后请在备注里留一个能联系到你的方式。默认按月到期，到期前三天我会提醒续费。
-        </p>
+    <div class="grid c3">
+      <div class="card">
+        <h3>1. 注册账号</h3>
+        <p>邮箱加密码即可，点任意「购买」按钮就能注册。</p>
+      </div>
+      <div class="card">
+        <h3>2. 选套餐</h3>
+        <p>选好后会在控制台自动开通，并生成第一把 API Key。</p>
+      </div>
+      <div class="card">
+        <h3>3. 复制代码开跑</h3>
+        <p>控制台里提供填好 Key 的 cURL / Python / Node 示例，一键复制。</p>
       </div>
     </div>
 
-    <div class="note" style="margin-top:22px">
-      <b>需要提前说明的几件事：</b>本服务为个人开发者运营，暂不能开具发票；暂不提供 SLA 与可用性承诺；请勿用于压测或二次分发。个人收款码用于经营性收款存在被风控的可能，条件成熟后会升级为商户号。
-    </div>
-
-    <div class="card" style="margin-top:22px;max-width:520px">
-      <h3>怎么联系</h3>
-      <p>把用途、预估用量、期望档位发到下面这个邮箱，或直接站内私信。</p>
-      <!-- TODO: 替换为真实联系方式 -->
-      <p style="margin-top:10px"><a href="mailto:contact@example.com" style="color:var(--link)">contact@example.com</a></p>
+    <div class="pay-box" style="margin-top:22px">
+      <img src="assets/alipay-qrcode.png" alt="支付宝收款码">
+      <div class="txt">
+        <h3 style="margin:0 0 8px;font-size:16px">关于付款</h3>
+        <p style="font-size:14px;color:var(--text-2);margin:0 0 10px">
+          页面上的套餐可以先开通试用。正式付款请用支付宝扫左侧二维码，
+          <strong>备注里写上你的注册邮箱</strong>，我核对到账后给账号充值并延长有效期。
+        </p>
+        <ol>
+          <li>先注册并拿到 Key，直接就能调用（有试用额度）。</li>
+          <li>扫码付款，备注写注册邮箱。</li>
+          <li>核对到账后延长套餐有效期，邮件通知你。</li>
+        </ol>
+        <p style="font-size:13px;color:var(--text-3);margin:14px 0 0">
+          当前为个人经营，暂不支持自动续费与开票，介意的话先别买。
+        </p>
+      </div>
     </div>
   </div>
 </section>
@@ -140,10 +152,10 @@
       <h2>几条容易产生误会的地方</h2>
     </div>
     <div class="grid c2">
-      <div class="card"><h3>token 怎么算</h3><p>输入与输出分别计量，累加到当期额度。图片按张数另计，计费明细在控制台可查。</p></div>
-      <div class="card"><h3>额度用完会怎样</h3><p>先从预付余额按量扣；余额也不足时接口返回 402，补充余额后立即恢复。</p></div>
-      <div class="card"><h3>支持退订吗</h3><p>随时可以停用，未消耗的预付余额按剩余额度退回，不接受按比例折现。</p></div>
-      <div class="card"><h3>会记录我的数据吗</h3><p>只记录用量与必要审计字段，不保存请求正文；审计日志有保留期限，到期自动清理。</p></div>
+      <div class="card"><h3>token 怎么算</h3><p>输入与输出分别计量，累加到当期额度，控制台可查明细。</p></div>
+      <div class="card"><h3>额度用完会怎样</h3><p>先按量从余额扣；余额不足接口返回 402，补充后立刻恢复。</p></div>
+      <div class="card"><h3>支持退订吗</h3><p>随时可停用，剩余预付额度按未消耗部分退回，不按比例折现。</p></div>
+      <div class="card"><h3>会记录我的数据吗</h3><p>只记录用量等计费字段，不保存请求正文，审计日志到期自动清理。</p></div>
     </div>
   </div>
 </section>
@@ -164,9 +176,9 @@
         <a href="api.html">快速开始</a><a href="api.html#models">模型与参数</a><a href="api.html#errors">错误码</a><a href="api.html#limits">限流</a>
       </div>
       <div class="col">
-        <h4>联系</h4>
+        <h4>账户</h4>
+        <a href="console.html">API 控制台</a>
         <a href="mailto:contact@example.com">contact@example.com</a>
-        <a href="#apply">申请 API Key</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -176,6 +188,24 @@
     </div>
   </div>
 </footer>
+
+<script src="assets/particles.js"></script>
+<script src="assets/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+  document.querySelectorAll('.js-buy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var plan = b.dataset.plan;
+      var name = b.dataset.name || '该套餐';
+      Auth.requireLogin('购买 ' + name, function () {
+        Auth.setPending({ plan: plan, at: Date.now() });
+        location.href = 'console.html';
+      });
+    });
+  });
+})();
+</script>
 
 </body>
 </html>

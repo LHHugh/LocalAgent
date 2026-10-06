@@ -115,40 +115,43 @@
   <div class="wrap">
     <div class="section-head">
       <div class="eyebrow">定价</div>
-      <h2>按额度订阅，用多少算多少</h2>
-      <p>内测期按内测价处理，正式价格与计量口径见定价页。</p>
+      <h2>便宜，是因为我们清楚自己几斤几两</h2>
+      <p>不跟顶级模型比效果，也不装作比得上。能做的是把价格压到足够低，让它成为一个"用得起"的选项。</p>
     </div>
     <div class="grid c4">
       <div class="price">
         <h3>Free</h3>
         <div class="amount">¥0</div>
-        <div class="quota">体验额度</div>
-        <ul><li>每日限量请求</li><li>6 RPM</li><li>社区支持</li></ul>
-        <a class="btn sm" href="pricing.html#apply">申请</a>
+        <div class="quota">每日 200 次请求</div>
+        <ul><li>6 RPM</li><li>并发 1</li><li>上下文 8192</li></ul>
+        <button class="btn sm js-buy" data-plan="free" data-name="Free">免费开始</button>
       </div>
       <div class="price">
         <h3>Starter</h3>
-        <div class="amount">¥39<small> / 月</small></div>
-        <div class="quota">100 万 token</div>
+        <div class="amount">¥9<small> / 月</small></div>
+        <div class="quota">含 300 万 token</div>
         <ul><li>30 RPM</li><li>并发 2</li><li>邮件支持</li></ul>
-        <a class="btn sm" href="pricing.html#apply">申请</a>
+        <button class="btn sm js-buy" data-plan="starter" data-name="Starter">购买</button>
       </div>
       <div class="price featured">
-        <span class="tag">推荐</span>
+        <span class="tag">最划算</span>
         <h3>Pro</h3>
-        <div class="amount">¥199<small> / 月</small></div>
-        <div class="quota">600 万 token</div>
+        <div class="amount">¥29<small> / 月</small></div>
+        <div class="quota">含 1500 万 token</div>
         <ul><li>120 RPM</li><li>并发 4</li><li>优先支持</li></ul>
-        <a class="btn sm primary" href="pricing.html#apply">申请</a>
+        <button class="btn sm primary js-buy" data-plan="pro" data-name="Pro">购买</button>
       </div>
       <div class="price">
-        <h3>Enterprise</h3>
-        <div class="amount">定制</div>
-        <div class="quota">私有化或专属实例</div>
-        <ul><li>速率协商</li><li>独占部署</li><li>可开票</li></ul>
-        <a class="btn sm" href="pricing.html#apply">联系</a>
+        <h3>Max</h3>
+        <div class="amount">¥99<small> / 月</small></div>
+        <div class="quota">含 6000 万 token</div>
+        <ul><li>300 RPM</li><li>并发 8</li><li>优先支持</li></ul>
+        <button class="btn sm js-buy" data-plan="max" data-name="Max">购买</button>
       </div>
     </div>
+    <p style="font-size:13px;color:var(--text-3);margin:18px 0 0">
+      价格可以随便看，不用登录；点购买时才需要注册一个账号。
+    </p>
   </div>
 </section>
 
@@ -198,6 +201,25 @@
     </div>
   </div>
 </footer>
+
+<script src="assets/particles.js"></script>
+<script src="assets/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+  // 购买入口：未登录先弹登录框，登录后带上套餐去控制台生成 Key
+  document.querySelectorAll('.js-buy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var plan = b.dataset.plan;
+      var name = b.dataset.name || '该套餐';
+      Auth.requireLogin('购买 ' + name, function () {
+        Auth.setPending({ plan: plan, at: Date.now() });
+        location.href = 'console.html';
+      });
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
