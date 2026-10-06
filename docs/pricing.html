@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>定价与开通 · Qwen3-VL API</title>
+<meta name="description" content="Qwen3-VL API 定价方案：按额度订阅与按量计费，内测期人工审核开通。">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="index.html"><span class="brand-mark">◈</span>Qwen3-VL API</a>
+    <nav class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="index.html#features">能力</a>
+      <a href="index.html#demo">在线演示</a>
+      <a href="pricing.html">定价</a>
+      <a href="api.html">文档</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn sm" href="api.html">查看文档</a>
+      <a class="btn sm primary" href="#apply">申请 API Key</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero" style="padding-bottom:20px">
+  <div class="wrap">
+    <div class="badge"><span class="dot"></span>内测价 · 人工开通</div>
+    <h1 style="font-size:34px">定价</h1>
+    <p class="lead" style="margin-bottom:10px">按月订阅额度，超出后按量计费。内测期价格可能调整，订阅前会在邮件中确认当期价格。</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:26px">
+  <div class="wrap">
+    <div class="grid c4">
+      <div class="price">
+        <h3>Free</h3>
+        <div class="amount">¥0</div>
+        <div class="quota">每日 200 次请求</div>
+        <ul><li>6 RPM</li><li>并发 1</li><li>最长上下文 8192</li><li>社区支持</li></ul>
+        <a class="btn sm" href="#apply">申请</a>
+      </div>
+      <div class="price">
+        <h3>Starter</h3>
+        <div class="amount">¥39<small> / 月</small></div>
+        <div class="quota">含 100 万 token</div>
+        <ul><li>30 RPM</li><li>并发 2</li><li>邮件支持</li><li>可开发票（升级后）</li></ul>
+        <a class="btn sm" href="#apply">申请</a>
+      </div>
+      <div class="price featured">
+        <span class="tag">推荐</span>
+        <h3>Pro</h3>
+        <div class="amount">¥199<small> / 月</small></div>
+        <div class="quota">含 600 万 token</div>
+        <ul><li>120 RPM</li><li>并发 4</li><li>优先支持</li><li>可开发票（升级后）</li></ul>
+        <a class="btn sm primary" href="#apply">申请</a>
+      </div>
+      <div class="price">
+        <h3>Enterprise</h3>
+        <div class="amount">定制</div>
+        <div class="quota">私有化或专属实例</div>
+        <ul><li>速率协商</li><li>独占部署</li><li>可签合同</li><li>可开票</li></ul>
+        <a class="btn sm" href="#apply">联系</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">按量计费</div>
+      <h2>超出套餐额度后</h2>
+      <p>额度用完不会直接停服，而是转为按量后付费，按下面的单价从预付余额里扣。</p>
+    </div>
+    <table class="spec">
+      <thead>
+        <tr><th>计费项</th><th>单价</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>输入 token</td><td class="num">¥2 / 百万</td><td>请求里的全部输入内容，含图片与历史消息</td></tr>
+        <tr><td>输出 token</td><td class="num">¥8 / 百万</td><td>模型生成的部分</td></tr>
+        <tr><td>图片输入</td><td class="num">¥0.02 / 张</td><td>按请求内图片张数计，与 token 叠加</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:20px">
+      <b>关于单价：</b>以上为内测期拟定价。正式定价会依据实测吞吐与实际成本回填，届时以本页更新为准。当前单机双卡、并发上限较低，若你预估用量较大，建议直接按 Enterprise 谈，不建议按量试算。
+    </div>
+  </div>
+</section>
+
+<section class="section" id="apply">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">开通流程</div>
+      <h2>当前为人工开通</h2>
+      <p>内测期没有自助购买，流程走人工，麻烦但可控。</p>
+    </div>
+
+    <div class="pay-box">
+      <!-- TODO: 确认这张收款码是否用于商业收款，并替换为对外收款码 -->
+      <img src="assets/alipay-qrcode.png" alt="支付宝收款码">
+      <div class="txt">
+        <h3 style="margin:0 0 8px;font-size:16px">开通步骤</h3>
+        <ol>
+          <li>发邮件或私信说明<strong>用途</strong>与<strong>预估月用量</strong>（例如「内部工具图文抽取，约 200 万 token/月」）。</li>
+          <li>我确认档位与当期价格后回你，并给出应付金额。</li>
+          <li>你用支付宝扫码付款，附言里写上你的称呼或申请编号，方便对账。</li>
+          <li>核对到账后，为你开通套餐并邮件发送 API Key 与调用示例。</li>
+        </ol>
+        <p style="font-size:13px;color:var(--text-3);margin:14px 0 0">
+          付款后请在备注里留一个能联系到你的方式。默认按月到期，到期前三天我会提醒续费。
+        </p>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <b>需要提前说明的几件事：</b>本服务为个人开发者运营，暂不能开具发票；暂不提供 SLA 与可用性承诺；请勿用于压测或二次分发。个人收款码用于经营性收款存在被风控的可能，条件成熟后会升级为商户号。
+    </div>
+
+    <div class="card" style="margin-top:22px;max-width:520px">
+      <h3>怎么联系</h3>
+      <p>把用途、预估用量、期望档位发到下面这个邮箱，或直接站内私信。</p>
+      <!-- TODO: 替换为真实联系方式 -->
+      <p style="margin-top:10px"><a href="mailto:contact@example.com" style="color:var(--link)">contact@example.com</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">计费细则</div>
+      <h2>几条容易产生误会的地方</h2>
+    </div>
+    <div class="grid c2">
+      <div class="card"><h3>token 怎么算</h3><p>输入与输出分别计量，累加到当期额度。图片按张数另计，计费明细在控制台可查。</p></div>
+      <div class="card"><h3>额度用完会怎样</h3><p>先从预付余额按量扣；余额也不足时接口返回 402，补充余额后立即恢复。</p></div>
+      <div class="card"><h3>支持退订吗</h3><p>随时可以停用，未消耗的预付余额按剩余额度退回，不接受按比例折现。</p></div>
+      <div class="card"><h3>会记录我的数据吗</h3><p>只记录用量与必要审计字段，不保存请求正文；审计日志有保留期限，到期自动清理。</p></div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-in">
+      <div class="col" style="max-width:300px">
+        <a class="brand" href="index.html" style="margin-bottom:10px"><span class="brand-mark">◈</span>Qwen3-VL API</a>
+        <p style="font-size:13.5px;color:var(--text-2);margin:0">兼容 OpenAI 接口的多模态大模型服务，个人开发者小范围运营。</p>
+      </div>
+      <div class="col">
+        <h4>产品</h4>
+        <a href="index.html#features">能力</a><a href="index.html#demo">在线演示</a><a href="pricing.html">定价</a>
+      </div>
+      <div class="col">
+        <h4>文档</h4>
+        <a href="api.html">快速开始</a><a href="api.html#models">模型与参数</a><a href="api.html#errors">错误码</a><a href="api.html#limits">限流</a>
+      </div>
+      <div class="col">
+        <h4>联系</h4>
+        <a href="mailto:contact@example.com">contact@example.com</a>
+        <a href="#apply">申请 API Key</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Qwen3-VL API</span>
+      <span>个人开发者运营，非企业服务</span>
+      <span>模型基于 Qwen3-VL 系列开源权重</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 文档 · Qwen3-VL API</title>
+<meta name="description" content="Qwen3-VL API 接入文档：鉴权、端点、图文输入、流式输出、错误码与限流说明，兼容 OpenAI SDK。">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="index.html"><span class="brand-mark">◈</span>Qwen3-VL API</a>
+    <nav class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="index.html#features">能力</a>
+      <a href="index.html#demo">在线演示</a>
+      <a href="pricing.html">定价</a>
+      <a href="api.html">文档</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn sm" href="demo/">在线演示</a>
+      <a class="btn sm primary" href="pricing.html#apply">申请 API Key</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap doc" style="padding-top:44px;padding-bottom:20px">
+  <h1 style="font-size:32px;margin:0 0 10px">API 文档</h1>
+  <p style="font-size:16px">接口形态与 OpenAI Chat Completions 对齐，官方 SDK 改个 <code>base_url</code> 即可使用。</p>
+
+  <div class="note">
+    <b>内测说明：</b>下文用 <code>https://YOUR-DOMAIN</code> 占位，实际地址会在开通邮件里一并给出。当前 <code>YOUR-DOMAIN</code> 的健康检查地址为 <code>/api/health</code>。
+  </div>
+
+  <h2 id="start">快速开始</h2>
+  <h3>1. 申请 API Key</h3>
+  <p>在<a href="pricing.html#apply">定价页</a>提交申请，审核通过后邮件收到形如 <code>sk-live-xxxxxxxx</code> 的 Key。Key 只在发放时展示一次，请自行保存。</p>
+
+  <h3>2. 发出第一个请求</h3>
+<pre class="snippet">curl https://YOUR-DOMAIN/v1/chat/completions \
+  -H "Authorization: Bearer sk-live-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen3-vl",
+    "messages": [
+      {"role": "user", "content": "用一句话介绍你自己"}
+    ],
+    "max_tokens": 256
+  }'</pre>
+
+  <h3>3. 用 OpenAI SDK</h3>
+<pre class="snippet">from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-live-xxxxxxxx",      # 建议从环境变量读取
+    base_url="https://YOUR-DOMAIN/v1",
+)
+
+resp = client.chat.completions.create(
+    model="qwen3-vl",
+    messages=[{"role": "user", "content": "用一句话介绍你自己"}],
+    max_tokens=256,
+)
+print(resp.choices[0].message.content)</pre>
+
+  <h2 id="auth">鉴权</h2>
+  <p>所有请求都需要在 <code>Authorization</code> 头里携带 Bearer Token：</p>
+<pre class="snippet">Authorization: Bearer sk-live-xxxxxxxx</pre>
+  <p>Key 与账号绑定，失效或被吊销后返回 401。发现 Key 泄露请立刻联系，会在后台吊销并补发新的。</p>
+
+  <h2 id="endpoints">端点一览</h2>
+  <table class="spec">
+    <thead><tr><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method">POST</span></td><td><code>/v1/chat/completions</code></td><td>对话补全，支持图文与流式</td></tr>
+      <tr><td><span class="method">GET</span></td><td><code>/v1/models</code></td><td>列出可用模型</td></tr>
+      <tr><td><span class="method">GET</span></td><td><code>/api/health</code></td><td>健康检查，含模型与时延</td></tr>
+      <tr><td><span class="method">GET</span></td><td><code>/v1/me</code></td><td>当前 Key 的套餐与剩余额度</td></tr>
+      <tr><td><span class="method">GET</span></td><td><code>/v1/usage</code></td><td>用量查询，支持按日期区间</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:14px"><code>/v1/me</code> 与 <code>/v1/usage</code> 属于控制台接口，形态与 OpenAI 不对应，单独说明。</p>
+
+  <h2 id="models">模型与参数</h2>
+  <p>请求体沿用 OpenAI 的字段名，常用参数如下：</p>
+  <table class="spec">
+    <thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>model</code></td><td>string</td><td>固定为 <code>qwen3-vl</code></td></tr>
+      <tr><td><code>messages</code></td><td>array</td><td>对话历史，<code>content</code> 支持字符串或内容数组</td></tr>
+      <tr><td><code>max_tokens</code></td><td>integer</td><td>最大生成长度，默认 1024，上限 2048</td></tr>
+      <tr><td><code>temperature</code></td><td>number</td><td>0 到 1，默认 0.7</td></tr>
+      <tr><td><code>stream</code></td><td>boolean</td><td>为 <code>true</code> 时以 SSE 流式返回</td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="margin-top:18px">
+    单次请求上下文上限 <b>8192 token</b>，单条消息最多携带 <b>1 张图片</b>。默认采样参数沿用模型自身的生成配置。
+  </div>
+
+  <h2 id="vision">图片输入</h2>
+  <p><code>content</code> 传数组时，文本用 <code>type: "text"</code>，图片用 <code>type: "image_url"</code>。图片来源有两种写法。</p>
+
+  <h3>方式一：base64 内联</h3>
+<pre class="snippet">import base64, os
+from openai import OpenAI
+
+client = OpenAI(api_key=os.environ["QWEN_API_KEY"],
+                base_url="https://YOUR-DOMAIN/v1")
+
+with open("shot.png", "rb") as f:
+    b64 = base64.b64encode(f.read()).decode()
+
+resp = client.chat.completions.create(
+    model="qwen3-vl",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "这张图里有什么？"},
+            {"type": "image_url",
+             "image_url": {"url": f"data:image/png;base64,{b64}"}},
+        ],
+    }],
+    max_tokens=512,
+)
+print(resp.choices[0].message.content)</pre>
+
+  <h3>方式二：公网图片地址</h3>
+<pre class="snippet">messages=[{
+    "role": "user",
+    "content": [
+        {"type": "text", "text": "把这张图里的表格转成 JSON"},
+        {"type": "image_url",
+         "image_url": {"url": "https://example.com/table.png"}},
+    ],
+}]</pre>
+  <p>用地址时服务端会去抓图，需要该地址对公网可访问。抓不到会返回 400，此时改用 base64。</p>
+
+  <h2 id="stream">流式输出</h2>
+  <p>把 <code>stream</code> 设为 <code>true</code>，返回 <code>text/event-stream</code>：</p>
+<pre class="snippet">import os
+from openai import OpenAI
+
+client = OpenAI(api_key=os.environ["QWEN_API_KEY"],
+                base_url="https://YOUR-DOMAIN/v1")
+
+stream = client.chat.completions.create(
+    model="qwen3-vl",
+    messages=[{"role": "user", "content": "写一段关于视频检索的说明"}],
+    stream=True,
+    max_tokens=512,
+)
+for chunk in stream:
+    delta = chunk.choices[0].delta.content
+    if delta:
+        print(delta, end="", flush=True)</pre>
+  <p>Node.js 侧用法一致，把创建请求的 <code>stream</code> 设为 <code>true</code> 后遍历返回的异步迭代器即可。</p>
+
+  <h2 id="errors">错误码</h2>
+  <table class="spec">
+    <thead><tr><th>状态码</th><th>含义</th><th>处理建议</th></tr></thead>
+    <tbody>
+      <tr><td class="num">400</td><td>请求格式有误</td><td>检查 messages 结构与图片格式</td></tr>
+      <tr><td class="num">401</td><td>Key 无效或已吊销</td><td>确认 Key 是否写错、是否已停用</td></tr>
+      <tr><td class="num">402</td><td>额度不足</td><td>补充余额或等待套餐刷新</td></tr>
+      <tr><td class="num">413</td><td>请求体过大</td><td>压缩图片或裁剪文本</td></tr>
+      <tr><td class="num">429</td><td>触发限流</td><td>按响应头 <code>Retry-After</code> 退避重试</td></tr>
+      <tr><td class="num">503</td><td>模型繁忙或未就绪</td><td>稍后重试，或查看状态页</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:14px">错误响应体统一为 <code>{ "error": { "message": "...", "type": "..." } }</code>，<code>message</code> 可以直接展示给终端用户。</p>
+
+  <h2 id="limits">限流</h2>
+  <table class="spec">
+    <thead><tr><th>套餐</th><th>每分钟请求</th><th>并发</th><th>单次上下文</th></tr></thead>
+    <tbody>
+      <tr><td>Free</td><td class="num">6</td><td class="num">1</td><td class="num">8192</td></tr>
+      <tr><td>Starter</td><td class="num">30</td><td class="num">2</td><td class="num">8192</td></tr>
+      <tr><td>Pro</td><td class="num">120</td><td class="num">4</td><td class="num">8192</td></tr>
+      <tr><td>Enterprise</td><td class="num">协商</td><td class="num">协商</td><td class="num">协商</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:14px">这是单机双卡的实际承载能力，不是随手写的数字。当前机器还要兼顾研究用途，峰值时段可能更慢，建议客户端做好重试与退避。</p>
+
+  <h2 id="usage">查询用量</h2>
+<pre class="snippet">curl https://YOUR-DOMAIN/v1/usage?start=2026-10-01&amp;end=2026-10-31 \
+  -H "Authorization: Bearer sk-live-xxxxxxxx"</pre>
+  <p>返回该区间内的请求数、输入与输出 token、消耗额度与错误次数，可用于对账。</p>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-in">
+      <div class="col" style="max-width:300px">
+        <a class="brand" href="index.html" style="margin-bottom:10px"><span class="brand-mark">◈</span>Qwen3-VL API</a>
+        <p style="font-size:13.5px;color:var(--text-2);margin:0">兼容 OpenAI 接口的多模态大模型服务，个人开发者小范围运营。</p>
+      </div>
+      <div class="col">
+        <h4>产品</h4>
+        <a href="index.html#features">能力</a><a href="index.html#demo">在线演示</a><a href="pricing.html">定价</a>
+      </div>
+      <div class="col">
+        <h4>文档</h4>
+        <a href="api.html#start">快速开始</a><a href="api.html#models">模型与参数</a><a href="api.html#errors">错误码</a><a href="api.html#limits">限流</a>
+      </div>
+      <div class="col">
+        <h4>联系</h4>
+        <a href="mailto:contact@example.com">contact@example.com</a>
+        <a href="pricing.html#apply">申请 API Key</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Qwen3-VL API</span>
+      <span>个人开发者运营，非企业服务</span>
+      <span>模型基于 Qwen3-VL 系列开源权重</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
